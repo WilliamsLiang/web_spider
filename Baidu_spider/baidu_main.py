@@ -8,8 +8,8 @@ reload(sys)
 sys.setdefaultencoding( "utf-8" )
 
 def main():
-    tieba_word=["穿山甲","野生","养生","中药","药材","文玩"]
-    keyword_search=["穿山甲","川山甲","山甲","山甲片","山甲粉","山甲珠","亚洲甲片","穿山甲爪子","鳞片","穿山甲鳞片","穿山甲鳞片粉","穿山甲药酒","穿山甲种苗","养殖穿山甲","收购山甲片","出售山甲片","收山甲片","穿山甲手链","山甲珠串"]
+    tieba_word=["足球"]
+    keyword_search=["梅西"]
     bd_spider = BDTieba_search()
     for tbw in tieba_word:
         for key in keyword_search:
