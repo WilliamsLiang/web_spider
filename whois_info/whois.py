@@ -144,7 +144,7 @@ def save_whois(input_path,out_path,cookies):
 if __name__=="__main__":
     input_path="result_keyword_multi_all.txt"
     out_path="result.txt"
-    inter_cookies="BIDUPSID=3C4AFA8418D46D786BBD6C74BE2EC3A2; PSTM=1524022253; __cfduid=d08a2aa208c0a77d104ed42aa42dfcc021524446725; MCITY=-193%3A; BAIDUID=1364B3D8BE2DCE6FC31CC0F1B0C96F98:FG=1; BDUSS=h0TklqRWx3cnhSVU9uRVd6NmhvYncwZ2NlS1FuU29zN01sT3NUeXVBbmNtN0ZiQUFBQUFBJCQAAAAAAAAAAAEAAAAcZLwyV2xpbW92ZWN5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANwOilvcDopbUl; cflag=15%3A3; pgv_pvi=885554176; BDRCVFR[feWj1Vr5u3D]=I67x6TjHwwYf0; PSINO=3; H_PS_PSSID=1462_26908_21116_20930; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; CAMPAIGN_TRACK=cp%3Aaladdin%7Ckw%3A23398; CAMPAIGN_TRACK_TIME=2018-09-03+10%3A36%3A09; Hm_lvt_28a17f66627d87f1d046eae152a1c93d=1535704822,1535799010,1535942165,1535942170; Hm_lpvt_28a17f66627d87f1d046eae152a1c93d=1535942170; BAIDU_CLOUD_TRACK_PATH=https://cloud.baidu.com/product/bcd/whois.html?domain=baidu.com&track=cp:aladdin%7Ckw:23398"
+    inter_cookies=""#cookies的设置
     re_co=re.findall(cookie_sub,inter_cookies)[0]
     cookies=inter_cookies.replace(re_co,"whois.html?domain={do_url}&")
     save_whois(input_path,out_path,cookies)
