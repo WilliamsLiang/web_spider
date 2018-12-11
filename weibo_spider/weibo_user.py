@@ -19,5 +19,5 @@ class weibo_user:
         return self.friend_list
 
     def add_friend(self,user):
-        if(user.get_id not in self.friend_list.keys()):
-            self.friend_list[user.get_id]=user
+        if(user.get_id() not in self.friend_list.keys()):
+            self.friend_list[user.get_id()]=user
