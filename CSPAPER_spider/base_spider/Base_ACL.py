@@ -7,14 +7,11 @@ import random
 import os
 from bs4 import BeautifulSoup
 
-reload(sys)
-sys.setdefaultencoding( "utf-8" )
-
-
 class base_ACL():
     def __init__(self,outpath=u"F:/会议论文下载/ACL/"):
         # 基础的url
-        self.FRONT_URL = "https://www.aclweb.org/anthology/events/"
+        self.BASE_URL = "https://aclanthology.org/"
+        self.FRONT_URL = "https://aclanthology.org/events/"
         """
         参数类型：
         user_id:URL中的ID
@@ -38,7 +35,7 @@ class base_ACL():
                         }
 
         #self.headers["cookie"]=cookies
-        self.id_list=[ pdfid.replace(".pdf","") for pdfid in os.listdir(outpath)]
+        self.id_list=[ pdfid.replace(".bib",".txt") for pdfid in os.listdir(outpath)]
         self.outpath=outpath
         print(self.id_list)
 
@@ -59,50 +56,105 @@ class base_ACL():
             html_text = res.text
             soup_string = BeautifulSoup(html_text, "html.parser")
             pdfurllist = self.get_pdfurl(soup_string)
-            for pdfurl in pdfurllist:
-                print(pdfurl + "开始下载....")
-                downflag = self.download_pdf(pdfurl)
-                print(pdfurl + "处理完毕....")
+            for url_list in pdfurllist:
+                bib_url,pdf_url,video_url,ppt_url = url_list
+                print(bib_url + "开始下载....")
+                downflag = self.download_pdf(bib_url,pdf_url,video_url,ppt_url)
+                print(bib_url + "处理完毕....")
                 if (downflag):
-                    print(pdfurl + "的pdf已经下载完毕")
-                    time.sleep(random.randint(10,20))
+                    print(bib_url + "的pdf已经下载完毕")
+                    time.sleep(random.randint(2,8))
             print(str(year) + "年的"+c_name+"页面内容已经下载完毕........")
 
-    def download_pdf(self,pdf_url):
+    def get_list(self,re_list):
+        if(not re_list):
+            return ""
+        else:
+            return re_list[0]
+
+    def get_bibtext(self,bibtext):
+        title_re = re.compile('[\s]title = "([\s\S]*?)"')
+        author_re = re.compile('[\s]author = "([\s\S]*?)"')
+        abstract_re = re.compile('[\s]abstract = "([\s\S]*?)"')
+        title = self.get_list(title_re.findall(bibtext))
+        author = self.get_list(author_re.findall(bibtext)).replace("and","|").replace("\r","").replace("\n","")
+        absract = self.get_list(abstract_re.findall(bibtext))
+        return title,author,absract
+        
+
+    def download_bib(self,bib_url):
+        file_name = bib_url.replace(".bib",".txt")
+        bib_url = self.BASE_URL + bib_url
+        readflag=False
+        while(not readflag):
+            try:
+                res_pdf = requests.get(bib_url, headers=self.headers,timeout=(5,25))
+                readflag=True
+                title,author,absract = self.get_bibtext(res_pdf.text)
+                with open(self.outpath+file_name, "wt",encoding="utf-8") as w:
+                    w.write("\n".join([title,author,absract]))
+            except requests.exceptions.RequestException:
+                print(bib_url + "出现超时....")
+                time.sleep(random.randint(20,60))
+                print(bib_url + "重新下载....")
+
+    def download_pdf(self,bib_url,pdf_url,video_url,ppt_url):
         self.headers["User-Agent"] = random.choice(self.user_agent)
-        fileid=pdf_url.split("/")[-1].replace(".pdf","")
-        if (fileid in self.id_list):
+        pdf_file = pdf_url.split("/")[-1]
+        video_file = video_url.split("/")[-1]
+        ppt_file = ppt_url.split("/")[-1]
+        bib_file = bib_url.split("/")[-1]
+        file_list = [_ for _ in [video_file,ppt_file] if("." in _)]
+        zip_list = [[m,n] for m,n in zip([pdf_file,video_file,ppt_file],[pdf_url,video_url,ppt_url]) if("." in m)]
+        tmp_flag = True
+        for f in file_list:
+            if(f not in self.id_list):
+                tmp_flag = False
+        if ((bib_file.replace(".bib",".txt") in self.id_list) and tmp_flag):
             downflag = False
         else:
-            filename = self.outpath + fileid + ".pdf"
-            readflag=False
-            while(not readflag):
-                try:
-                    res_pdf = requests.get(pdf_url, headers=self.headers,timeout=(5,25))
-                    readflag=True
-                    with open(filename, "wb") as w:
-                        w.write(res_pdf.content)
-                except requests.exceptions.RequestException:
-                    print(pdf_url + "出现超时....")
-                    time.sleep(random.randint(120,240))
-                    print(pdf_url + "重新下载....")
+            if(bib_file.replace(".bib",".txt") not in self.id_list):
+                self.download_bib(bib_url)
+            if(not tmp_flag):
+                for fname,furl in zip_list:
+                    readflag=False
+                    while(not readflag):
+                        try:
+                            res_pdf = requests.get(furl, headers=self.headers,timeout=(5,25))
+                            readflag=True
+                            with open(self.outpath+fname, "wb") as w:
+                                w.write(res_pdf.content)
+                        except requests.exceptions.RequestException:
+                            print(furl + "出现超时....")
+                            time.sleep(random.randint(20,60))
+                            print(furl + "重新下载....")
             downflag = True
         return downflag
 
+    def get_url(self,aurl_list):
+        if(not aurl_list):
+            return ""
+        else:
+            a = aurl_list[0]
+            return a.get("href")
+        
+
     def get_pdfurl(self,maindiv):
-        pdf_plist=maindiv.find_all("p",attrs={"class" :"d-sm-flex align-items-stretch"})
+        pdf_plist = maindiv.find_all("p",attrs={"class" :"d-sm-flex align-items-stretch"})
         for a_wrap in pdf_plist:
-            pdfa_list=a_wrap.find_all("a",attrs={"title" :"Open PDF"})
-            if(not pdfa_list):
+            pdfa_url = self.get_url(a_wrap.find_all("a",attrs={"title" :"Open PDF"}))
+            videoa_url = self.get_url(a_wrap.find_all("a",attrs={"title" :"Video"}))
+            ppt_url = self.get_url(a_wrap.find_all("a",attrs = {"title" :"Presentation"}))
+            bib_url = self.get_url(a_wrap.find_all("a",attrs = {"title" :"Export to BibTeX"}))
+            if(not bib_url):
                 continue
-            pdfa=pdfa_list[0]
-            yield pdfa.get("href")
+            yield bib_url,pdfa_url,videoa_url,ppt_url
 
 if __name__=="__main__":
     #ba = base_ACL(outpath=u"F:/会议论文下载/ACL/")
     #ba.crawl("acl", year_list=[2019, 2018, 2017, 2016, 2015])
     # ba.crawl("acl", year_list=[2019])
-    emnlp_ba=base_ACL(outpath=u"F:/会议论文下载/EMNLP/")
-    emnlp_ba.crawl("emnlp",year_list=[2019,2018,2017,2016,2015])
+    emnlp_ba=base_ACL(outpath=u"G:/acl/")
+    emnlp_ba.crawl("acl",year_list=[2021,2020,2019,2018,2017,2016])
     #emnlp_ba.crawl("emnlp", year_list=[2019])
 
