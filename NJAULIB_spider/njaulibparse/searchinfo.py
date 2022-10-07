@@ -4,14 +4,11 @@ import sys
 import re
 import requests
 import urllib
-import urllib2
 import time
 import random
 from bs4 import BeautifulSoup
 from njaulibparse.bookinfo import bookinfo
 
-reload(sys)
-sys.setdefaultencoding( "utf-8" )
 
 class searchinfo():
     def __init__(self):

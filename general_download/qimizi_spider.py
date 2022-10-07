@@ -1,5 +1,5 @@
 #encoding=utf-8
-import sys
+
 import re
 import requests
 import time
@@ -7,8 +7,6 @@ import random
 import os
 from bs4 import BeautifulSoup
 
-reload(sys)
-sys.setdefaultencoding( "utf-8" )
 
 class base_qimizi():
     def __init__(self,outpath=u"C:/Users/sfe_williamsL/Desktop/tmp_qimizi.txt"):

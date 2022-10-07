@@ -1,10 +1,6 @@
 #encoding=utf-8
 
-import sys
 from njaulibparse.searchinfo import searchinfo
-
-reload(sys)
-sys.setdefaultencoding( "utf-8" )
 
 if __name__=="__main__":
     bi=searchinfo()

@@ -1,5 +1,4 @@
 #encoding=utf-8
-import sys
 import re
 import requests
 import time
@@ -8,8 +7,6 @@ import json
 import os
 from bs4 import BeautifulSoup
 
-reload(sys)
-sys.setdefaultencoding( "utf-8" )
 
 class base_elibrary():
     def __init__(self):

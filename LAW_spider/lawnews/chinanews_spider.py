@@ -1,6 +1,5 @@
 #encoding=utf-8
 
-import sys
 import re
 import requests
 import time
@@ -8,8 +7,6 @@ import random
 import os
 from bs4 import BeautifulSoup
 
-reload(sys)
-sys.setdefaultencoding( "utf-8" )
 
 getnexta=re.compile(r'<a href="(.*?)">下一页</a>')
 
